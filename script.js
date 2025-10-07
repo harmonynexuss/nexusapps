@@ -21,6 +21,8 @@ if (canvas) {
             this.vx = (Math.random() - 0.5) * 0.5;
             this.vy = (Math.random() - 0.5) * 0.5;
             this.radius = 2;
+            // Randomly assign primary or secondary color
+            this.colorType = Math.random() > 0.5 ? 'primary' : 'secondary';
         }
 
         update() {
@@ -32,12 +34,21 @@ if (canvas) {
         }
 
         draw() {
-            const theme = document.documentElement.getAttribute('data-theme');
-            const color = theme === 'dark' ? '255, 255, 255' : '26, 26, 26';
+            const color = this.colorType === 'primary' ? '1, 254, 254' : '254, 3, 255';
             
+            // Draw glow
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+            const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
+            gradient.addColorStop(0, `rgba(${color}, 0.4)`);
+            gradient.addColorStop(1, `rgba(${color}, 0)`);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            
+            // Draw particle
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(${color}, 0.5)`;
+            ctx.fillStyle = `rgba(${color}, 0.8)`;
             ctx.fill();
         }
     }
@@ -55,8 +66,6 @@ if (canvas) {
 
     // Draw connections
     function drawConnections() {
-        const theme = document.documentElement.getAttribute('data-theme');
-        const color = theme === 'dark' ? '255, 255, 255' : '26, 26, 26';
         const maxDistance = 150;
 
         for (let i = 0; i < particles.length; i++) {
@@ -66,9 +75,24 @@ if (canvas) {
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance < maxDistance) {
-                    const opacity = (1 - distance / maxDistance) * 0.3;
+                    const opacity = (1 - distance / maxDistance) * 0.4;
+                    
+                    // Create gradient based on particle colors
+                    const gradient = ctx.createLinearGradient(
+                        particles[i].x, particles[i].y,
+                        particles[j].x, particles[j].y
+                    );
+                    
+                    const color1 = particles[i].colorType === 'primary' ? 
+                        `rgba(1, 254, 254, ${opacity})` : `rgba(254, 3, 255, ${opacity})`;
+                    const color2 = particles[j].colorType === 'primary' ? 
+                        `rgba(1, 254, 254, ${opacity})` : `rgba(254, 3, 255, ${opacity})`;
+                    
+                    gradient.addColorStop(0, color1);
+                    gradient.addColorStop(1, color2);
+                    
                     ctx.beginPath();
-                    ctx.strokeStyle = `rgba(${color}, ${opacity})`;
+                    ctx.strokeStyle = gradient;
                     ctx.lineWidth = 1;
                     ctx.moveTo(particles[i].x, particles[i].y);
                     ctx.lineTo(particles[j].x, particles[j].y);
