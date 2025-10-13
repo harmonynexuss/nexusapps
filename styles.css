@@ -260,6 +260,13 @@ body {
     justify-content: center;
 }
 
+.app-icon-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
 .app-info {
     width: 100%;
 }
